@@ -49,9 +49,9 @@ SELECT nom_personnage, nom_bataille, MAX(qte) AS total_casque
 FROM personnage p, bataille b, prendre_casque pc
 WHERE p.id_personnage = pc.id_personnage
 AND b.id_bataille = pc.id_bataille
+AND nom_bataille = "Bataille du village gaulois"
 GROUP BY nom_personnage
 ORDER BY total_casque DESC;
-
 
 /**** Exercice 9 ****/
 SELECT nom_personnage, SUM(dose_boire) AS total_boire
@@ -64,8 +64,11 @@ ORDER BY total_boire DESC;
 SELECT nom_bataille, SUM(qte) AS total_casque
 FROM bataille b, prendre_casque p
 WHERE b.id_bataille = p.id_bataille
-GROUP BY nom_bataille DESC
-LIMIT 1;
+GROUP BY nom_bataille 
+HAVING SUM(qte) >= ALL (SELECT SUM(qte)     
+FROM bataille b, prendre_casque p    
+WHERE b.id_bataille = p.id_bataille     
+GROUP BY b.nom_bataille );
 
 /**** Exercice 11 ****/
 SELECT nom_type_casque, COUNT(c.id_type_casque) AS nb, SUM(cout_casque)
@@ -87,13 +90,28 @@ FROM lieu l, personnage p
 WHERE l.id_lieu = p.id_lieu
 AND nom_lieu != "Village gaulois"
 GROUP BY nom_lieu
-ORDER BY total DESC
-LIMIT 2;
+HAVING total >= ALL(SELECT COUNT(nom_personnage)
+FROM lieu l, personnage p
+WHERE l.id_lieu = p.id_lieu
+AND nom_lieu != "Village gaulois"
+GROUP BY nom_lieu);
 
 /**** Exercice 14 ****/
-
-
-
-
+SELECT p.nom_personnage, p.id_personnage
+FROM personnage p
+WHERE p.id_personnage NOT IN (SELECT p.id_personnage
+FROM personnage p, boire b
+WHERE p.id_personnage=b.id_personnage)
 
 /**** Exercice 15 ****/
+SELECT nom_personnage
+FROM personnage p 
+WHERE p.id_personnage NOT IN (SELECT id_personnage
+FROM autoriser_boire , potion 
+WHERE potion.id_potion = autoriser_boire.id_potion
+and potion.nom_potion = "Magique")
+
+
+
+/**** Exercice A ****/
+
